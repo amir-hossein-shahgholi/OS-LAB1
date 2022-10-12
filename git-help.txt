@@ -1,4 +1,0 @@
-ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts #Add github to the list of known hosts to get clone repo.
-ssh-keygen -t ed25519 -C "your git email" #Generate ssh-key for github.
- 
-
