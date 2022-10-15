@@ -1,9 +1,9 @@
 # OS-LAB1
 **Linux (x64)**  
   
-To install the requirments run this command  
+To install the requirements run this command  
 ```bash
-bash install-requirments.sh
+bash install-requirements.sh
 ```  
 To run the Xv6 on Qemu run this command  
 ```bash
