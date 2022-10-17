@@ -3,6 +3,7 @@
 #include "types.h"
 #include "user.h"
 #include "fcntl.h"
+#include "stat.h"
 
 // Parsed command representation
 #define EXEC  1
@@ -12,6 +13,8 @@
 #define BACK  5
 
 #define MAXARGS 10
+
+void save_command(char *s);
 
 struct cmd {
   int type;
@@ -164,8 +167,10 @@ main(void)
         printf(2, "cannot cd %s\n", buf+3);
       continue;
     }
-    if(fork1() == 0)
+    if(fork1() == 0){
+      save_command(buf);
       runcmd(parsecmd(buf));
+    }
     wait();
   }
   exit();
@@ -490,4 +495,36 @@ nulterminate(struct cmd *cmd)
     break;
   }
   return cmd;
+}
+
+
+void save_command(char *s)
+{
+    int line_count = 0;
+    char *FILE_NAME = "cmd_history.txt";
+    char buffer[15 * 128];
+    int fd = open(FILE_NAME,  O_CREATE | O_RDWR);
+    read(fd, buffer, sizeof(buffer));
+    for (int i=0; i<=strlen(buffer); i++){
+        if (buffer[i] == '\n')
+          line_count = line_count + 1;
+    }
+    if (line_count >= 15)
+      line_count = 14;
+    char tempp[15*128];
+    for (int i=0; i<strlen(s); i++)
+      tempp[i] = s[i];
+    int i=0;
+    int charno = strlen(s) ;
+    while (i<line_count)
+    {
+      tempp[charno] = buffer[charno - strlen(s) ];
+      charno++;
+      if (buffer[charno - strlen(s) - 1] == '\n')
+        i++;
+    }
+  close(fd);
+  fd = open(FILE_NAME,  O_CREATE | O_WRONLY);
+  write(fd, tempp, strlen(tempp));
+  close(fd);;
 }

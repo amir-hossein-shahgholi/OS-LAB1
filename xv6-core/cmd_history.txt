@@ -1,0 +1,3 @@
+ls
+cat cmd_history.txt
+cat sh

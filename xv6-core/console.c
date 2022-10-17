@@ -14,6 +14,7 @@
 #include "mmu.h"
 #include "proc.h"
 #include "x86.h"
+#include "read.h"
 
 static void consputc(int);
 
@@ -213,6 +214,55 @@ consoleintr(int (*getc)(void))
         consputc(BACKSPACE);
       }
       break;
+    case '\t':
+      char buffer[15 * 128];
+      int char_no = 0;
+      int copy_of_input_e = input.e;
+      read_file(buffer);
+      while(input.e != input.w &&
+            input.buf[(input.e-1) % INPUT_BUF] != '\n'){
+              consputc(BACKSPACE);
+        input.e--;
+      }
+      char_no = copy_of_input_e - input.e;
+      input.e = copy_of_input_e;
+      char s[INPUT_BUF];
+      for (int i=1; i <= char_no; i++)
+        s[char_no - i] = input.buf[(input.e-i) % INPUT_BUF];
+      int flag =0;
+      int flag2 =0;
+      int start_char=0;
+      for (int i=0; i<strlen(buffer);i++)
+      {
+        if(buffer[i] == '\n')
+          start_char = i+1;
+        if (s[0] == buffer[i])
+        {
+          
+          for (int j=0; j<strlen(s); j++)
+          {
+            if(s[j] != buffer[i+j])
+              {
+                flag =1;
+                break;
+              }
+          }
+          if (flag ==0)
+          {
+            for (int z=start_char; z< start_char + INPUT_BUF; z++){
+              if(buffer[z] != '\n')
+                consputc(buffer[z]);
+              else
+                break;
+            }
+          flag2 = 1;
+          }
+        }
+      }
+      if (flag2 == 0)
+        for(int i=0;i<strlen(s);i++)
+          consputc(s[i]);
+      break;
     default:
       if(c != 0 && input.e-input.r < INPUT_BUF){
         c = (c == '\r') ? '\n' : c;
@@ -296,4 +346,3 @@ consoleinit(void)
 
   ioapicenable(IRQ_KBD, 0);
 }
-
