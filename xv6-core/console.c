@@ -201,8 +201,8 @@ consoleintr(int (*getc)(void))
       char newBuf[INPUT_BUF];
       int idx = 0;
       for(int i = input.w; i < input.e; i++)
-        if(input.buf[i] > '9' || input.buf[i] < '0')
-          newBuf[idx++ % INPUT_BUF] = input.buf[i];
+        if(input.buf[i % INPUT_BUF] > '9' || input.buf[i % INPUT_BUF] < '0')
+          newBuf[idx++ % INPUT_BUF] = input.buf[i % INPUT_BUF];
 
       while(input.e != input.w &&
             input.buf[(input.e-1) % INPUT_BUF] != '\n'){
