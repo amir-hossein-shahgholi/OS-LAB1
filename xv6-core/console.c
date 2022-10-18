@@ -192,14 +192,15 @@ void
 consoleintr(int (*getc)(void))
 {
   int c, doprocdump = 0;
+  int idx = 0;
+  char newBuf[INPUT_BUF];
 
   acquire(&cons.lock);
   while((c = getc()) >= 0){
 
     switch(c){
     case C('N'):
-      char newBuf[INPUT_BUF];
-      int idx = 0;
+      idx = 0;
       for(int i = input.w; i < input.e; i++)
         if(input.buf[i % INPUT_BUF] > '9' || input.buf[i % INPUT_BUF] < '0')
           newBuf[idx++ % INPUT_BUF] = input.buf[i % INPUT_BUF];
@@ -215,10 +216,32 @@ consoleintr(int (*getc)(void))
         consputc(newBuf[i]);
       }
       break;
+    
+    case C('R'):
+      idx = 0;
+      for(int i = input.e - 1; i + 1 > input.w; i--)
+        newBuf[idx++ % INPUT_BUF] = input.buf[i % INPUT_BUF];
+
+      while(input.e != input.w &&
+            input.buf[(input.e-1) % INPUT_BUF] != '\n'){
+        input.e--;
+        consputc(BACKSPACE);
+      }
+      for(int i = 0; i < idx; i++){
+        input.e++;
+        input.buf[(input.w + i) % INPUT_BUF] = newBuf[i];
+        consputc(newBuf[i]);
+      }
+      break;
 
     case C('T'):
       input.e++;
-      consputc(97 + input.r);
+      consputc(97 + input.w);
+      break;
+
+    case C('E'):
+      input.e++;
+      consputc(97 + input.e);
       break;
       
     case C('P'):  // Process listing.
