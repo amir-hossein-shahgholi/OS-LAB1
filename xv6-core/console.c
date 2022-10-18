@@ -15,6 +15,8 @@
 #include "proc.h"
 #include "x86.h"
 
+#define INPUT_BUF 128 
+
 static void consputc(int);
 
 static int panicked = 0;
@@ -48,7 +50,59 @@ printint(int xx, int base, int sign)
   while(--i >= 0)
     consputc(buf[i]);
 }
+char cmd_history[15][INPUT_BUF];
+char complete_result[INPUT_BUF];
 //PAGEBREAK: 50
+
+void save_command(char* buffer)
+{
+  for (int i=13; i>=0;i--)
+  {
+    if(cmd_history[i][0] != ' ')
+    {
+      for (int j=0;j<strlen(cmd_history[i]);j++)
+      {
+        cmd_history[i+1][j] = cmd_history[i][j];
+        if(j == strlen(cmd_history[i])-1)
+          cmd_history[i+1][j+1] = '\0';
+      }
+
+    }
+  }
+  for (int i=0;i<strlen(buffer);i++)
+  {
+    cmd_history[0][i] = buffer[i];
+  }
+  cmd_history[0][strlen(buffer)] = '\0';
+  }
+
+void search()
+{
+  for (int i=0;i<15;i++)
+  {
+    int flag =0;
+    for (int j=0;j<strlen(complete_result); j++)
+    {
+      if(j>= strlen(cmd_history[i])){
+        flag=1;
+        break;}
+      if(complete_result[j]!= cmd_history[i][j])
+      {
+        flag=1;
+        break;
+      }
+    }
+    if (flag == 0)
+    {
+      for (int z=0;z<strlen(cmd_history[i]);z++)
+      {
+        complete_result[z] = cmd_history[i][z];
+      }
+      complete_result[strlen(cmd_history[i])] = '\0';
+    }
+  }
+}
+
 
 // Print to the console. only understands %d, %x, %p, %s.
 void
@@ -178,7 +232,7 @@ consputc(int c)
   cgaputc(c);
 }
 
-#define INPUT_BUF 128
+
 struct {
   char buf[INPUT_BUF];
   uint r;  // Read index
@@ -197,7 +251,7 @@ consoleintr(int (*getc)(void))
 
   acquire(&cons.lock);
   while((c = getc()) >= 0){
-
+    char buffer[INPUT_BUF];
     switch(c){
     case C('N'):
       idx = 0;
@@ -261,12 +315,36 @@ consoleintr(int (*getc)(void))
         consputc(BACKSPACE);
       }
       break;
+    case '\t':
+      int index =0;
+      while(input.e != input.w &&
+            input.buf[(input.e-1) % INPUT_BUF] != '\n'){
+        complete_result[index] = input.buf[(input.w + index) % INPUT_BUF];
+        index++;
+        input.e--;
+        consputc(BACKSPACE);
+      }
+      complete_result[index] = '\0';
+      search();
+      for (int y=0;y<strlen(complete_result);y++)
+      {
+        input.e++;
+        consputc(complete_result[y]);
+      }
+      break;
     default:
       if(c != 0 && input.e-input.r < INPUT_BUF){
         c = (c == '\r') ? '\n' : c;
         input.buf[input.e++ % INPUT_BUF] = c;
         consputc(c);
         if(c == '\n' || c == C('D') || input.e == input.r+INPUT_BUF){
+          if (c == '\n') //End of command
+          {
+            for (int i=input.w; i < input.e-1; i++)
+              buffer[i-input.w] = input.buf[i % INPUT_BUF];
+            buffer[(input.e - input.w -1) % INPUT_BUF] = '\0';
+            save_command(buffer);
+          }
           input.w = input.e;
           wakeup(&input.r);
         }
