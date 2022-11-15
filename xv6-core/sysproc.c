@@ -89,3 +89,10 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_flpf(void)
+{
+  int num = myproc()->tf->ebx;
+  return flpf(num);
+}
