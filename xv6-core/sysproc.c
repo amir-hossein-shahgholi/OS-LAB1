@@ -96,3 +96,9 @@ sys_flpf(void)
   int num = myproc()->tf->ebx;
   return flpf(num);
 }
+
+int
+sys_get_parent_pid(void)
+{
+  return myproc()->parent->pid;
+}
