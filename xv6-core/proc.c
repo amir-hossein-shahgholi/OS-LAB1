@@ -12,6 +12,8 @@ struct {
   struct proc proc[NPROC];
 } ptable;
 
+int syscall_history [NSYSCALLS][NHIST] = {0};
+
 static struct proc *initproc;
 
 int nextpid = 1;
@@ -546,16 +548,40 @@ flpf(int num)
   return i;
 }
 
-int
+void
 get_callers(int num)
 {
-  struct proc *p;
-  int count = 0;
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-    if(p->tf->eax == num)
+  int count = 0, i;
+  int flag = 0;
+  cprintf("caller ids:");
+  for(i = 0; i < NHIST; i++)
+    if(syscall_history[num - 1][i]){
+      if(flag)
+        cprintf(", ");
+      cprintf("%d", syscall_history[num - 1][i]);
+      flag = 1;
       count++;
-    cprintf("pid:%d, tf_eax:%d, name:%s\n", p->pid, p->tf->eax, p->name);
+    }
+  cprintf("\n");
+  
+  return;
+}
+
+void 
+set_pid_for_syscall(int pid, int syscall_num)
+{
+  int i = 0;
+  int new_syscall = 1;
+  while(i < NHIST && syscall_history[syscall_num - 1][i]){
+    if(syscall_history[syscall_num - 1][i] == pid){
+      new_syscall = 0;
+      break;
+    }
+    i++;
   }
 
-  return count;
+  if(i != NHIST && new_syscall)
+    syscall_history[syscall_num - 1][i] = pid;
+  
+  return;
 }

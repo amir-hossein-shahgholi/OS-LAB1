@@ -25,7 +25,7 @@ int sleep(int);
 int uptime(void);
 int flpf(void);
 int get_parent_pid(void);
-int get_callers(void);
+void get_callers(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

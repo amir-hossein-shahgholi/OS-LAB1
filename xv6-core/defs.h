@@ -121,7 +121,8 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 int             flpf(int);
-int             get_callers(int);
+void            get_callers(int);
+void            set_pid_for_syscall(int, int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

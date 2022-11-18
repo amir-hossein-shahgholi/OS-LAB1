@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
         : "=r" (reg_for_restore)
         : "r" (num)
     );
-    printf(1, "count: %d\n", get_callers());
+    get_callers();
     asm("movl %0, %%ebx;" : : "r" (reg_for_restore));
     exit();
 }
