@@ -102,3 +102,10 @@ sys_get_parent_pid(void)
 {
   return myproc()->parent->pid;
 }
+
+int 
+sys_get_callers(void)
+{
+  int num = myproc()->tf->ebx;
+  return get_callers(num);
+}

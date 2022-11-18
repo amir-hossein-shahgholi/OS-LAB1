@@ -546,3 +546,16 @@ flpf(int num)
   return i;
 }
 
+int
+get_callers(int num)
+{
+  struct proc *p;
+  int count = 0;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->tf->eax == num)
+      count++;
+    cprintf("pid:%d, tf_eax:%d, name:%s\n", p->pid, p->tf->eax, p->name);
+  }
+
+  return count;
+}
