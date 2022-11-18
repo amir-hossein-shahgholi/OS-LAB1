@@ -26,6 +26,7 @@ int uptime(void);
 int flpf(void);
 int get_parent_pid(void);
 void get_callers(void);
+void change_file_size(const char *, int);
 
 // ulib.c
 int stat(const char*, struct stat*);

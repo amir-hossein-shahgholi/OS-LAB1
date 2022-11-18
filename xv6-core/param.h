@@ -11,6 +11,6 @@
 #define LOGSIZE      (MAXOPBLOCKS*3)  // max data blocks in on-disk log
 #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
 #define FSSIZE       1000  // size of file system in blocks
-#define NSYSCALLS    24 // number of system calls
+#define NSYSCALLS    25 // number of system calls
 #define NHIST        64 // maximum number of history of pids
 

@@ -23,3 +23,4 @@
 #define SYS_flpf   22
 #define SYS_get_parent_pid 23
 #define SYS_get_callers 24
+#define SYS_change_file_size 25

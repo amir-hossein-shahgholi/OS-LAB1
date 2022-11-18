@@ -106,6 +106,7 @@ extern int sys_uptime(void);
 extern int sys_flpf(void);
 extern int sys_get_parent_pid(void);
 extern int sys_get_callers(void);
+extern int sys_change_file_size(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -132,6 +133,7 @@ static int (*syscalls[])(void) = {
 [SYS_flpf]    sys_flpf,
 [SYS_get_parent_pid]  sys_get_parent_pid,
 [SYS_get_callers] sys_get_callers,
+[SYS_change_file_size] sys_change_file_size,
 };
 
 void

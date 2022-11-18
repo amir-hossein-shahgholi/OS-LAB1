@@ -442,3 +442,76 @@ sys_pipe(void)
   fd[1] = fd1;
   return 0;
 }
+
+void 
+sys_change_file_size(void)
+{
+  char *path;
+  argstr(0, &path);
+  int length;
+  argint(1, &length);
+  cprintf("file:%s, len:%d\n", path, length);
+
+  // file open
+  int fd, omode = O_RDWR;
+  struct file *f;
+  struct inode *ip;
+
+  begin_op();
+
+  if(omode & O_CREATE){
+    ip = create(path, T_FILE, 0, 0);
+    if(ip == 0){
+      end_op();
+      return;
+    }
+  } else {
+    if((ip = namei(path)) == 0){
+      end_op();
+      return;
+    }
+    ilock(ip);
+    if(ip->type == T_DIR && omode != O_RDONLY){
+      iunlockput(ip);
+      end_op();
+      return;
+    }
+  }
+
+  if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
+    if(f)
+      fileclose(f);
+    iunlockput(ip);
+    end_op();
+    return;
+  }
+  iunlock(ip);
+  end_op();
+
+  f->type = FD_INODE;
+  f->ip = ip;
+  f->off = 0;
+  f->readable = !(omode & O_WRONLY);
+  f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
+  // open finish
+
+  // file read start
+  char buf[512];
+
+  fileread(f, buf, sizeof(buf));
+
+  // file read finish  
+
+  // redefine start
+  struct stat *st = '\0';
+  filestat(f, st);
+  int i;
+  for(i = 0; i + 1 < st->size; i++){
+    char temp[2];
+    temp[0] = buf[i];
+    temp[1] = '\0';
+    cprintf("%s\n", temp);
+  }
+  cprintf("size:%d\n", st->size - 1);
+  
+}
