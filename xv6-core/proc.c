@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 
+
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -546,3 +548,58 @@ flpf(int num)
   return i;
 }
 
+struct semaphore {
+  struct spinlock lock;
+  int val;
+  int owner;
+  int locked;
+};
+
+struct semaphore spoons[6];
+
+int sem_init(int i, int v)
+{
+  acquire(&spoons[i].lock);
+  if (spoons[i].locked != 0) 
+  {
+    release(&spoons[i].lock);
+    return -1;
+  } else 
+  {
+    spoons[i].locked = 1;
+    spoons[i].val = v;
+    spoons[i].owner = -1; // No philosopher has it.
+  }  
+  release(&spoons[i].lock);
+  return 0;
+}
+
+int sem_acquire(int i)
+{
+  acquire(&spoons[i].lock);
+  if (spoons[i].val > 0) 
+  {
+    spoons[i].owner = i;
+    spoons[i].val -= 1;
+  } else 
+  {
+    while (spoons[i].val < 1) 
+    {
+      sleep(&spoons[i],&spoons[i].lock);
+    }
+    spoons[i].owner = i;
+    spoons[i].val -= 1;
+  }
+  release(&spoons[i].lock);
+  return 0;
+}
+
+int sem_release(int i)
+{
+  acquire(&spoons[i].lock);
+  spoons[i].owner = -1;
+  spoons[i].val += 1;
+  wakeup(&spoons[i]); 
+  release(&spoons[i].lock);
+  return 0;
+}

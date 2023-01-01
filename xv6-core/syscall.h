@@ -22,3 +22,7 @@
 #define SYS_close  21
 #define SYS_flpf   22
 #define SYS_get_parent_pid 23
+#define SYS_sem_init 24
+#define SYS_sem_acquire 25
+#define SYS_sem_release 26
+

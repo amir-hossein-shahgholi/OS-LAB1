@@ -121,6 +121,9 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 int             flpf(int);
+int             sem_init(int,int);
+int             sem_acquire(int);
+int             sem_release(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

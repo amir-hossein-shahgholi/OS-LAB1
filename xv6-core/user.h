@@ -25,6 +25,9 @@ int sleep(int);
 int uptime(void);
 int flpf(void);
 int get_parent_pid(void);
+int sem_init(int i, int j);
+int sem_acquire(int i);
+int sem_release(int i);
 
 // ulib.c
 int stat(const char*, struct stat*);
